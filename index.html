@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculadora do evento · Papo de Business</title>
+<meta name="description" content="Simulador de custos, receita e ponto de equilíbrio do evento Papo de Business.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0a0d14">
+<meta property="og:title" content="Calculadora do evento · Papo de Business">
+<meta property="og:description" content="Simulador de custos, receita e ponto de equilíbrio.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230a0d14'/%3E%3Cpath d='M9 22V10h3.4v9.1H23V22H9z' fill='%234b7bec'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0d14; --panel:#121722; --panel2:#151b28; --line:#1e2635;
+  --line-soft:#171d29; --text:#e8ecf4; --muted:#8b96ab; --dim:#5c6779;
+  --blue:#4b7bec; --blue-deep:#2c4a8f; --green:#3fbf87; --red:#e2685f; --amber:#e8b04b;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Poppins',system-ui,-apple-system,sans-serif;
+  background:var(--bg); color:var(--text);
+  -webkit-font-smoothing:antialiased; line-height:1.5;
+}
+.wrap{max-width:1220px;margin:0 auto;padding:32px 24px 80px}
+
+/* ---------- topo ---------- */
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;
+     border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:28px;flex-wrap:wrap}
+.top h1{font-size:27px;font-weight:700;letter-spacing:-.6px;line-height:1.2}
+.top p{font-size:13px;color:var(--muted);margin-top:6px}
+.top .brandmark{font-size:11px;letter-spacing:2.4px;color:var(--dim);font-weight:500}
+.top .brandmark b{color:var(--blue);font-weight:600}
+
+/* ---------- presets ---------- */
+.presets{display:flex;gap:8px;flex-wrap:wrap}
+button{font-family:inherit;cursor:pointer}
+.preset{background:var(--panel);border:1px solid var(--line);color:var(--muted);
+        font-size:12.5px;font-weight:500;padding:9px 16px;border-radius:9px;
+        transition:border-color .15s,color .15s}
+.preset:hover{border-color:var(--blue-deep);color:var(--text)}
+.preset.on{background:#16264a;border-color:var(--blue-deep);color:#8fb0f5}
+.preset:focus-visible,input:focus-visible,.icon:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+/* ---------- layout ---------- */
+.cols{display:grid;grid-template-columns:1fr 400px;gap:24px;align-items:start}
+@media(max-width:960px){.cols{grid-template-columns:1fr}}
+
+/* ---------- blocos ---------- */
+.block{background:var(--panel);border:1px solid var(--line);border-radius:16px;
+       padding:22px 24px;margin-bottom:18px}
+.block > header{display:flex;justify-content:space-between;align-items:baseline;
+                margin-bottom:16px;gap:12px}
+.block h2{font-size:15.5px;font-weight:600;letter-spacing:-.1px}
+.block .hint{font-size:11.5px;color:var(--dim)}
+.block .sum{font-size:15px;font-weight:600;color:var(--blue);font-variant-numeric:tabular-nums}
+
+/* ---------- linhas de input ---------- */
+.row{display:grid;grid-template-columns:1fr 128px 30px;gap:10px;align-items:center;
+     padding:7px 0;border-bottom:1px solid var(--line-soft)}
+.row:last-of-type{border-bottom:none}
+.row label,.row .nm{font-size:12.8px;color:#c3cbdb}
+.row .sub{display:block;font-size:11px;color:var(--dim);margin-top:1px}
+input[type=text],input[type=number]{
+  width:100%;background:#0d1119;border:1px solid var(--line);border-radius:8px;
+  color:var(--text);font-family:inherit;font-size:13px;font-weight:500;
+  padding:9px 11px;text-align:right;font-variant-numeric:tabular-nums;
+  transition:border-color .15s}
+input:hover{border-color:#2a3547}
+input:focus{border-color:var(--blue)}
+input.nome{text-align:left;font-weight:400;color:#c3cbdb;background:transparent;border-color:transparent}
+input.nome:hover,input.nome:focus{background:#0d1119;border-color:var(--line)}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
+.icon{background:transparent;border:none;color:#3c4657;font-size:17px;line-height:1;
+      padding:4px 6px;border-radius:6px;transition:color .15s}
+.icon:hover{color:var(--red)}
+.addrow{margin-top:12px;background:transparent;border:1px dashed #2a3547;color:var(--muted);
+        font-size:12.5px;padding:9px 14px;border-radius:9px;width:100%;transition:.15s}
+.addrow:hover{border-color:var(--blue-deep);color:var(--text)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px}
+@media(max-width:560px){
+  .wrap{padding:24px 14px 60px}
+  .grid2{grid-template-columns:1fr}
+  .block{padding:18px 16px}
+  .row{grid-template-columns:1fr 92px 26px;gap:8px}
+  .block > header{flex-wrap:wrap;gap:4px}
+  .block .sum{white-space:nowrap}
+  .top h1{font-size:23px}
+  .result{padding:20px}
+  .result .big{font-size:34px}
+}
+
+/* ---------- painel de resultado ---------- */
+.panel{position:sticky;top:24px}
+.result{background:linear-gradient(150deg,#131c31 0%,var(--panel) 62%);
+        border:1px solid var(--blue-deep);border-radius:16px;padding:24px;margin-bottom:18px}
+.result .lbl{font-size:12px;color:var(--muted)}
+.result .big{font-size:42px;font-weight:700;letter-spacing:-2px;line-height:1.1;margin:4px 0 2px;
+             font-variant-numeric:tabular-nums}
+.result .big.pos{color:var(--green)} .result .big.neg{color:var(--red)}
+.result .note{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
+
+/* ---------- barra de equilíbrio ---------- */
+.be{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+.be .head{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:10px}
+.be .head b{color:var(--text);font-weight:600}
+.track{position:relative;height:12px;background:#0d1119;border-radius:7px;overflow:hidden}
+.fill{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#4b7bec,#6b95f0);
+      border-radius:7px;transition:width .35s cubic-bezier(.4,0,.2,1)}
+.fill.done{background:linear-gradient(90deg,#2e9e6e,#3fbf87)}
+.fill.short{background:linear-gradient(90deg,#c25a52,#e2685f)}
+.be .foot{display:flex;justify-content:space-between;font-size:11.5px;color:var(--dim);margin-top:9px}
+
+/* ---------- métricas ---------- */
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);
+         border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:18px}
+.metric{background:var(--panel);padding:16px 18px}
+.metric .v{font-size:19px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.4px}
+.metric .k{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* ---------- tabela receita ---------- */
+.lines{width:100%;border-collapse:collapse;font-size:12.5px}
+.lines td{padding:9px 0;border-bottom:1px solid var(--line-soft);color:#c3cbdb}
+.lines td:last-child{text-align:right;font-variant-numeric:tabular-nums;color:var(--text);font-weight:500}
+.lines tr:last-child td{border-bottom:none}
+.lines tr.tot td{border-top:1px solid var(--line);border-bottom:none;padding-top:12px;
+                 font-weight:600;color:var(--text)}
+.lines td.q{color:var(--dim);font-size:11.5px}
+
+/* ---------- alerta ---------- */
+.mplan{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+       border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:18px}
+.mstat{background:var(--panel2);padding:14px 15px}
+.mstat .v{font-size:16.5px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.3px}
+.mstat .k{font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.35}
+@media(max-width:700px){.mplan{grid-template-columns:1fr 1fr}}
+.eleicao{border-left:3px solid var(--amber);background:#1a1710;border-radius:0 12px 12px 0;
+         padding:13px 16px;margin-top:16px;font-size:12.2px;color:#c8c0a8;line-height:1.55}
+.eleicao b{color:var(--amber);font-weight:600}
+.flag{border-left:3px solid var(--amber);background:#1a1710;border-radius:0 12px 12px 0;
+      padding:13px 16px;margin-bottom:18px;font-size:12.3px;color:#c8c0a8;line-height:1.55}
+.flag b{color:var(--amber);font-weight:600}
+.flag.ok{border-color:var(--green);background:#0f1b16;color:#9dc9b4}
+.flag.ok b{color:var(--green)}
+.flag[hidden]{display:none}
+
+.actions{display:flex;gap:8px}
+.actions button{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--muted);
+                font-size:12.5px;padding:11px;border-radius:9px;transition:.15s}
+.actions button:hover{border-color:var(--blue-deep);color:var(--text)}
+.saved{font-size:11.5px;color:var(--green);text-align:center;margin-top:9px;min-height:16px}
+
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div>
+      <div class="brandmark"><b>LOCUS</b> &nbsp;×&nbsp; PAPO DE BUSINESS</div>
+      <h1 style="margin-top:8px">Calculadora do evento</h1>
+      <p>Ajuste qualquer despesa ou volume de venda e veja o resultado mudar na hora.</p>
+    </div>
+    <div class="presets">
+      <button class="preset" data-preset="pessimista">Pessimista</button>
+      <button class="preset on" data-preset="realista">Realista</button>
+      <button class="preset" data-preset="meta">Meta</button>
+    </div>
+  </div>
+
+  <div class="cols">
+    <!-- ============ COLUNA ESQUERDA ============ -->
+    <div>
+
+      <section class="block">
+        <header>
+          <div><h2>Estrutura do evento</h2><div class="hint">Custos irreversíveis após a contratação da casa</div></div>
+          <div class="sum" id="sumEstrutura">R$ 0</div>
+        </header>
+        <div id="listaEstrutura"></div>
+        <button class="addrow" data-add="estrutura">+ Adicionar despesa de estrutura</button>
+      </section>
+
+      <section class="block">
+        <header>
+          <div><h2>Transmissão e produção</h2><div class="hint">Reversíveis até 16/09 se a venda não decolar</div></div>
+          <div class="sum" id="sumMarketing">R$ 0</div>
+        </header>
+        <div id="listaMarketing"></div>
+        <button class="addrow" data-add="marketing">+ Adicionar despesa de campanha</button>
+      </section>
+
+      <section class="block">
+        <header><div><h2>Preços e taxas</h2></div></header>
+        <div class="grid2">
+          <div class="row" style="grid-template-columns:1fr 110px"><label for="pGeral">Ingresso geral</label><input type="number" id="pGeral" step="1"></div>
+          <div class="row" style="grid-template-columns:1fr 110px"><label for="pVip">Ingresso VIP</label><input type="number" id="pVip" step="1"></div>
+          <div class="row" style="grid-template-columns:1fr 110px"><label for="pOnline">Acesso online</label><input type="number" id="pOnline" step="0.1"></div>
+          <div class="row" style="grid-template-columns:1fr 110px"><label for="pBump">Order bump</label><input type="number" id="pBump" step="0.1"></div>
+          <div class="row" style="grid-template-columns:1fr 110px"><label for="gwPct">Taxa do gateway <span class="sub">percentual sobre a venda</span></label><input type="number" id="gwPct" step="0.1"></div>
+          <div class="row" style="grid-template-columns:1fr 110px"><label for="gwFix">Taxa fixa <span class="sub">por transação</span></label><input type="number" id="gwFix" step="0.1"></div>
+          <div class="row" style="grid-template-columns:1fr 110px"><label for="comFis">Comissão de afiliado <span class="sub">por ingresso físico</span></label><input type="number" id="comFis" step="1"></div>
+          <div class="row" style="grid-template-columns:1fr 110px"><label for="comOn">Comissão de afiliado <span class="sub">por acesso online</span></label><input type="number" id="comOn" step="1"></div>
+        </div>
+      </section>
+
+      <section class="block">
+        <header>
+          <div><h2>Planejamento de mídia</h2><div class="hint">Quanto investir para entregar o volume projetado no tráfego pago</div></div>
+          <div class="sum" id="sumMidia">R$ 0</div>
+        </header>
+        <div class="grid2">
+          <div class="row" style="grid-template-columns:1fr 110px"><label for="cpaGeral">CPA base do ingresso geral <span class="sub">custo por venda fora do período eleitoral</span></label><input type="number" id="cpaGeral" step="1"></div>
+          <div class="row" style="grid-template-columns:1fr 110px"><label for="cpaOnline">CPA base do acesso online</label><input type="number" id="cpaOnline" step="1"></div>
+          <div class="row" style="grid-template-columns:1fr 110px"><label for="inflacao">Inflação do período eleitoral <span class="sub">acréscimo sobre o CPA, em %</span></label><input type="number" id="inflacao" step="5"></div>
+          <div class="row" style="grid-template-columns:1fr 110px"><label for="verba">Verba disponível <span class="sub">quanto você tem em caixa para mídia</span></label><input type="number" id="verba" step="500"></div>
+        </div>
+        <div class="mplan" id="mplan"></div>
+        <div class="eleicao">
+          <b>26/09 cai 8 dias antes do primeiro turno.</b> Toda a janela de venda acontece no pico do leilão de anúncios.
+          Trabalhe com 20% a 40% de acréscimo no CPA, priorize campanhas de conversão em site e evite objetivo de mensagem,
+          que sofre com a saturação política no WhatsApp.
+        </div>
+      </section>
+
+      <section class="block">
+        <header><div><h2>Volume de vendas</h2><div class="hint">Quantidade projetada por canal de origem</div></div></header>
+        <div class="grid2">
+          <div class="row" style="grid-template-columns:1fr 110px"><label for="qOrg">Gerais no orgânico <span class="sub">audiência do Papo de Business</span></label><input type="number" id="qOrg"></div>
+          <div class="row" style="grid-template-columns:1fr 110px"><label for="qPago">Gerais no tráfego pago</label><input type="number" id="qPago"></div>
+          <div class="row" style="grid-template-columns:1fr 110px"><label for="qAfil">Gerais por afiliado</label><input type="number" id="qAfil"></div>
+          <div class="row" style="grid-template-columns:1fr 110px"><label for="qVip">Ingressos VIP</label><input type="number" id="qVip"></div>
+          <div class="row" style="grid-template-columns:1fr 110px"><label for="qOnOrg">Online no orgânico</label><input type="number" id="qOnOrg"></div>
+          <div class="row" style="grid-template-columns:1fr 110px"><label for="qOnAfil">Online por afiliado</label><input type="number" id="qOnAfil"></div>
+          <div class="row" style="grid-template-columns:1fr 110px"><label for="qOnPago">Online no tráfego pago</label><input type="number" id="qOnPago"></div>
+          <div class="row" style="grid-template-columns:1fr 110px"><label for="bumpPct">Adesão ao order bump <span class="sub">% dos compradores físicos</span></label><input type="number" id="bumpPct"></div>
+          <div class="row" style="grid-template-columns:1fr 110px"><label for="patroc">Patrocínio fechado <span class="sub">valor total em reais</span></label><input type="number" id="patroc" step="100"></div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ============ COLUNA DIREITA ============ -->
+    <div class="panel">
+      <div class="result">
+        <div class="lbl">Resultado líquido do evento</div>
+        <div class="big" id="resultado">R$ 0</div>
+        <div class="note" id="resumo"></div>
+
+        <div class="be">
+          <div class="head">
+            <span>Ponto de equilíbrio</span>
+            <span id="beTxt"><b>0</b> ingressos gerais</span>
+          </div>
+          <div class="track"><div class="fill" id="beFill" style="width:0%"></div></div>
+          <div class="foot">
+            <span id="beProj">0 projetados</span>
+            <span id="beGap"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flag" id="flagCac" hidden></div>
+
+      <div class="metrics">
+        <div class="metric"><div class="v" id="mReceita">R$ 0</div><div class="k">Receita líquida</div></div>
+        <div class="metric"><div class="v" id="mCusto">R$ 0</div><div class="k">Custo total</div></div>
+        <div class="metric"><div class="v" id="mMargem">0%</div><div class="k">Margem sobre receita</div></div>
+        <div class="metric"><div class="v" id="mTicket">R$ 0</div><div class="k">Ticket médio líquido</div></div>
+        <div class="metric"><div class="v" id="mCacTeto">R$ 0</div><div class="k">Teto de CAC por ingresso</div></div>
+        <div class="metric"><div class="v" id="mCacReal">—</div><div class="k">CPA do geral já com eleição</div></div>
+      </div>
+
+      <section class="block">
+        <header><div><h2>Receita por linha</h2></div></header>
+        <table class="lines">
+          <tbody id="linhas"></tbody>
+        </table>
+      </section>
+
+      <div class="actions">
+        <button id="btnSalvar">Salvar cenário</button>
+        <button id="btnRestaurar">Restaurar padrão</button>
+      </div>
+      <div class="saved" id="aviso"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const BRL = n => 'R$ ' + Math.round(n).toLocaleString('pt-BR');
+const el = id => document.getElementById(id);
+
+const PADRAO = {
+  estrutura:[
+    ['Locação do espaço',5500],['Som, luz e palco',3800],['Staff e credenciamento',1200],
+    ['Brigadista, seguro e licenças',900],['Coffee break e água',1600],['Kit VIP',600],
+    ['Deslocamento de palestrantes',900],['Impressos e sinalização',500]
+  ],
+  marketing:[
+    ['Câmeras, captura e operador',2200],['Internet e redundância 4G',800]
+  ],
+  campos:{pGeral:67,pVip:400,pOnline:29.9,pBump:19.9,gwPct:7,gwFix:1,comFis:23.45,comOn:15,
+          cpaGeral:35,cpaOnline:18,inflacao:30,verba:4000,
+          qOrg:200,qPago:90,qAfil:100,qVip:10,qOnOrg:350,qOnAfil:100,qOnPago:0,bumpPct:25,patroc:8000}
+};
+
+const CENARIOS = {
+  pessimista:{qOrg:100,qPago:40,qAfil:40,qVip:5,qOnOrg:100,qOnAfil:50,qOnPago:0,bumpPct:18,patroc:0},
+  realista:  {qOrg:200,qPago:90,qAfil:100,qVip:10,qOnOrg:350,qOnAfil:100,qOnPago:0,bumpPct:25,patroc:8000},
+  meta:      {qOrg:200,qPago:90,qAfil:100,qVip:25,qOnOrg:600,qOnAfil:150,qOnPago:100,bumpPct:30,patroc:18000}
+};
+
+let despesas = {estrutura:[], marketing:[]};
+
+/* ---------- construção das linhas de despesa ---------- */
+function linhaDespesa(grupo, nome, valor, idx){
+  const div = document.createElement('div');
+  div.className = 'row';
+  div.innerHTML = `
+    <input type="text" class="nome" value="${nome.replace(/"/g,'&quot;')}" aria-label="Nome da despesa">
+    <input type="number" value="${valor}" step="50" aria-label="Valor da despesa">
+    <button class="icon" title="Remover ${nome}" aria-label="Remover ${nome}">×</button>`;
+  const [inNome, inVal, btn] = [div.children[0], div.children[1], div.children[2]];
+  inNome.oninput = () => { despesas[grupo][idx].nome = inNome.value; };
+  inVal.oninput  = () => { despesas[grupo][idx].valor = +inVal.value || 0; calcular(); };
+  btn.onclick    = () => { despesas[grupo].splice(idx,1); render(); };
+  return div;
+}
+
+function render(){
+  ['estrutura','marketing'].forEach(g => {
+    const box = el(g==='estrutura' ? 'listaEstrutura' : 'listaMarketing');
+    box.innerHTML = '';
+    despesas[g].forEach((d,i) => box.appendChild(linhaDespesa(g, d.nome, d.valor, i)));
+  });
+  calcular();
+}
+
+document.querySelectorAll('[data-add]').forEach(b => {
+  b.onclick = () => { despesas[b.dataset.add].push({nome:'Nova despesa', valor:0}); render(); };
+});
+
+/* ---------- cálculo ---------- */
+function calcular(){
+  const v = id => +el(id).value || 0;
+  const liq = p => Math.max(0, p - (p * v('gwPct')/100) - v('gwFix'));
+
+  const custoEstrutura = despesas.estrutura.reduce((s,d)=>s+d.valor,0);
+  const custoMarketing = despesas.marketing.reduce((s,d)=>s+d.valor,0);
+
+  const infl = 1 + v('inflacao')/100;
+  const cpaG = v('cpaGeral') * infl;
+  const cpaO = v('cpaOnline') * infl;
+  const investimento = v('qPago') * cpaG + v('qOnPago') * cpaO;
+
+  const custoTotal = custoEstrutura + custoMarketing + investimento;
+
+  const lGeral = liq(v('pGeral')), lVip = liq(v('pVip'));
+  const lOnline = liq(v('pOnline')), lBump = liq(v('pBump'));
+
+  const qGerais = v('qOrg') + v('qPago') + v('qAfil');
+  const qBump = Math.round((qGerais + v('qVip')) * v('bumpPct')/100);
+
+  const rGerais = (v('qOrg')+v('qPago')) * lGeral + v('qAfil') * Math.max(0, lGeral - v('comFis'));
+  const rVip    = v('qVip') * lVip;
+  const qOnline = v('qOnOrg') + v('qOnAfil') + v('qOnPago');
+  const rOnline = (v('qOnOrg') + v('qOnPago')) * lOnline + v('qOnAfil') * Math.max(0, lOnline - v('comOn'));
+  const rBump   = qBump * lBump;
+  const rPatroc = v('patroc');
+  const receita = rGerais + rVip + rOnline + rBump + rPatroc;
+
+  const resultado = receita - custoTotal;
+
+  /* ponto de equilíbrio em ingressos gerais, mantidas as demais linhas */
+  const mixGeral = qGerais > 0 ? rGerais / qGerais : lGeral;
+  const faltaCobrir = custoTotal - (receita - rGerais);
+  const beNec = mixGeral > 0 ? Math.max(0, Math.ceil(faltaCobrir / mixGeral)) : 0;
+
+  /* saída */
+  el('sumEstrutura').textContent = BRL(custoEstrutura);
+  el('sumMarketing').textContent = BRL(custoMarketing);
+  el('sumMidia').textContent = BRL(investimento);
+
+  const saldo = v('verba') - investimento;
+  el('mplan').innerHTML = [
+    ['CPA do ingresso geral', BRL(cpaG), cpaG > lGeral*0.30 ? 'var(--red)' : 'var(--green)'],
+    ['CPA do acesso online', BRL(cpaO), cpaO > lOnline*0.50 ? 'var(--red)' : 'var(--green)'],
+    ['Investimento necessário', BRL(investimento), 'var(--text)'],
+    [saldo >= 0 ? 'Sobra da verba' : 'Falta de verba', BRL(Math.abs(saldo)), saldo >= 0 ? 'var(--green)' : 'var(--red)']
+  ].map(([k,val,cor]) => `<div class="mstat"><div class="v" style="color:${cor}">${val}</div><div class="k">${k}</div></div>`).join('');
+
+  const box = el('resultado');
+  box.textContent = (resultado >= 0 ? '' : '− ') + BRL(Math.abs(resultado));
+  box.className = 'big ' + (resultado >= 0 ? 'pos' : 'neg');
+
+  el('resumo').textContent = resultado >= 0
+    ? `${qGerais + v('qVip')} ingressos presenciais e ${qOnline} acessos online cobrem o custo e sobram ${BRL(resultado)}.`
+    : `Faltam ${BRL(Math.abs(resultado))} para fechar o custo do evento.`;
+
+  const fill = el('beFill');
+  if (beNec === 0){
+    el('beTxt').innerHTML = '<b>custo já coberto</b>';
+    el('beProj').textContent = qGerais + ' gerais projetados';
+    el('beGap').textContent = 'patrocínio e online cobrem a estrutura';
+    fill.style.width = '100%';
+    fill.className = 'fill done';
+  } else {
+    el('beTxt').innerHTML = `<b>${beNec}</b> ingressos gerais`;
+    el('beProj').textContent = qGerais + ' projetados';
+    const pct = Math.min(100, qGerais / beNec * 100);
+    fill.style.width = pct + '%';
+    fill.className = 'fill ' + (qGerais >= beNec ? 'done' : (pct < 60 ? 'short' : ''));
+    el('beGap').textContent = qGerais >= beNec
+      ? `${qGerais - beNec} acima do equilíbrio`
+      : `faltam ${beNec - qGerais}`;
+  }
+
+  el('mReceita').textContent = BRL(receita);
+  el('mCusto').textContent   = BRL(custoTotal);
+  const margem = receita > 0 ? resultado/receita*100 : 0;
+  el('mMargem').textContent  = margem.toFixed(0) + '%';
+  el('mMargem').style.color  = margem >= 0 ? 'var(--green)' : 'var(--red)';
+
+  const totalUnidades = qGerais + v('qVip') + qOnline;
+  el('mTicket').textContent = totalUnidades > 0 ? BRL((receita - rPatroc)/totalUnidades) : 'R$ 0';
+
+  const teto = lGeral * 0.30;
+  el('mCacTeto').textContent = BRL(teto);
+
+  el('mCacReal').textContent = BRL(cpaG);
+  el('mCacReal').style.color = cpaG > teto ? 'var(--red)' : 'var(--green)';
+
+  const flag = el('flagCac');
+  if (saldo < 0){
+    flag.hidden = false;
+    flag.className = 'flag';
+    flag.innerHTML = `<b>Verba insuficiente.</b> Entregar esse volume no tráfego custa ${BRL(investimento)} e você tem ${BRL(v('verba'))}. Faltam ${BRL(Math.abs(saldo))}, ou ${Math.floor(Math.abs(saldo)/cpaG)} ingressos que precisam vir do orgânico e dos afiliados.`;
+  } else if (v('qPago') > 0 && cpaG > teto){
+    flag.hidden = false;
+    flag.className = 'flag';
+    flag.innerHTML = `<b>CPA acima do teto.</b> Com a inflação eleitoral, cada ingresso custa ${BRL(cpaG)} contra um teto saudável de ${BRL(teto)}. Cada venda no tráfego pago destrói margem — realoque para o online, que suporta CPA maior em proporção.`;
+  } else if (v('qPago') > 0){
+    flag.hidden = false;
+    flag.className = 'flag ok';
+    flag.innerHTML = `<b>CPA dentro do teto.</b> ${BRL(cpaG)} por ingresso contra um limite de ${BRL(teto)}, já considerando a alta do período eleitoral.`;
+  } else flag.hidden = true;
+
+  el('linhas').innerHTML = [
+    ['Ingressos gerais', qGerais, rGerais],
+    ['Ingressos VIP', v('qVip'), rVip],
+    ['Acessos online', qOnline, rOnline],
+    ['Order bump', qBump, rBump],
+    ['Patrocínio', '', rPatroc]
+  ].map(([n,q,r]) => `<tr><td>${n} ${q!=='' ? `<span class="q">· ${q}</span>` : ''}</td><td>${BRL(r)}</td></tr>`)
+   .join('') + `<tr class="tot"><td>Receita líquida</td><td>${BRL(receita)}</td></tr>`;
+}
+
+/* ---------- presets ---------- */
+document.querySelectorAll('.preset').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('.preset').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    const c = CENARIOS[b.dataset.preset];
+    Object.entries(c).forEach(([k,val]) => el(k).value = val);
+    calcular();
+  };
+});
+
+/* ---------- estado ---------- */
+function aplicar(estado){
+  despesas = {
+    estrutura: estado.estrutura.map(d => Array.isArray(d) ? {nome:d[0],valor:d[1]} : d),
+    marketing: estado.marketing.map(d => Array.isArray(d) ? {nome:d[0],valor:d[1]} : d)
+  };
+  Object.entries(estado.campos).forEach(([k,val]) => { if (el(k)) el(k).value = val; });
+  render();
+}
+
+function estadoAtual(){
+  const campos = {};
+  Object.keys(PADRAO.campos).forEach(k => campos[k] = +el(k).value || 0);
+  return {estrutura:despesas.estrutura, marketing:despesas.marketing, campos};
+}
+
+function aviso(txt){ el('aviso').textContent = txt; setTimeout(()=>el('aviso').textContent='', 2600); }
+
+el('btnSalvar').onclick = () => {
+  try{
+    localStorage.setItem('pdb:cenario', JSON.stringify(estadoAtual()));
+    aviso('Cenário salvo neste navegador.');
+  }catch(e){ aviso('O navegador bloqueou o armazenamento local.'); }
+};
+
+el('btnRestaurar').onclick = () => { aplicar(structuredClone(PADRAO)); aviso('Valores padrão restaurados.'); };
+
+document.querySelectorAll('input[type=number]').forEach(i => i.addEventListener('input', calcular));
+
+(function iniciar(){
+  let estado = null;
+  try{
+    const bruto = localStorage.getItem('pdb:cenario');
+    if (bruto) estado = JSON.parse(bruto);
+  }catch(e){}
+  aplicar(estado || structuredClone(PADRAO));
+})();
+</script>
+</body>
+</html>

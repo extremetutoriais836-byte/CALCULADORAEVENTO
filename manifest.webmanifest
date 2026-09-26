@@ -1,0 +1,12 @@
+{
+  "name": "Check-in · Papo de Business",
+  "short_name": "PdB Check-in",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0b0a08",
+  "theme_color": "#0b0a08",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

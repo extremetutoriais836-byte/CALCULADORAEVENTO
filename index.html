@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0a08">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Check-in · Papo de Business</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preload" href="orbitron-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="montserrat-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="topbar__inner">
+      <img class="topbar__logo" src="logo-papo-de-business.png" alt="Papo de Business" width="1400" height="256">
+      <div class="topbar__meta">
+        <span class="eyebrow">Check-in</span>
+        <span class="topbar__date">26.09.2026</span>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Seções">
+      <button class="tab is-active" role="tab" aria-selected="true" aria-controls="view-checkin" id="tab-checkin" data-view="checkin">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+        Check-in
+      </button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="view-confirmados" id="tab-confirmados" data-view="confirmados">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg>
+        Confirmados <span class="tab__count" id="tabCount">0</span>
+      </button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- ============ CHECK-IN ============ -->
+    <section class="view is-active" id="view-checkin" role="tabpanel" aria-labelledby="tab-checkin">
+      <div class="empty-base" id="emptyBase" hidden>
+        <div class="empty-base__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h6"/></svg>
+        </div>
+        <h2 class="display-sm">Nenhuma lista carregada</h2>
+        <p class="muted">Carregue a planilha de convidados ou adicione pessoas manualmente para começar o check-in.</p>
+        <div class="empty-base__actions">
+          <button class="btn btn--gold" type="button" data-goto-upload>Carregar planilha</button>
+          <button class="btn btn--ghost" type="button" data-add-guest>+ Adicionar manualmente</button>
+        </div>
+      </div>
+
+      <div id="checkinArea">
+        <div class="search">
+          <div class="search__top">
+            <label class="search__label eyebrow" for="searchInput">Buscar convidado</label>
+            <button class="btn btn--ghost btn--sm" type="button" data-add-guest>+ Adicionar</button>
+          </div>
+          <div class="search__box">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+            <input id="searchInput" type="search" inputmode="search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Nome, telefone ou e-mail">
+            <button class="search__clear" id="searchClear" type="button" aria-label="Limpar busca" hidden>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+          </div>
+          <div class="search__stats" id="searchStats"></div>
+        </div>
+
+        <nav class="alpha" id="alpha" aria-label="Navegar por letra"></nav>
+        <div class="results-head" id="resultsHead" hidden></div>
+        <ul class="results" id="results" aria-live="polite"></ul>
+        <div class="noresult" id="noResult" hidden>
+          <div class="status-pill status-pill--danger">Não encontrado na lista</div>
+          <p class="muted" id="noResultText"></p>
+          <button class="btn btn--gold" type="button" id="addFromSearch">+ Adicionar manualmente</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CONFIRMADOS ============ -->
+    <section class="view" id="view-confirmados" role="tabpanel" aria-labelledby="tab-confirmados" hidden>
+      <div class="stats" id="stats"></div>
+
+      <div class="panel">
+        <div class="panel__head">
+          <h2 class="display-sm">Lista de confirmados</h2>
+          <div class="panel__actions">
+            <button class="btn btn--ghost btn--sm" type="button" id="exportXlsx">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg> Excel
+            </button>
+            <button class="btn btn--ghost btn--sm" type="button" id="exportCsv">CSV</button>
+          </div>
+        </div>
+        <div class="filterbar">
+          <div class="search__box search__box--sm">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+            <input id="confSearch" type="search" autocomplete="off" placeholder="Filtrar confirmados">
+          </div>
+          <div class="chips" role="group" aria-label="Filtro">
+            <button class="chip is-active" type="button" data-filter="all">Todos</button>
+            <button class="chip" type="button" data-filter="premium">Premium</button>
+            <button class="chip" type="button" data-filter="companions">Com acompanhante</button>
+          </div>
+        </div>
+        <ol class="conf-list" id="confList"></ol>
+        <div class="empty-inline" id="confEmpty">Nenhuma entrada confirmada ainda.</div>
+      </div>
+
+      <div class="panel" id="uploadPanel">
+        <div class="panel__head">
+          <h2 class="display-sm">Base de convidados</h2>
+          <div class="panel__actions">
+            <button class="btn btn--ghost btn--sm" type="button" data-add-guest>+ Adicionar</button>
+            <button class="btn btn--ghost btn--sm" type="button" id="downloadTemplate">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg> Modelo
+            </button>
+          </div>
+        </div>
+        <div class="base-info" id="baseInfo"></div>
+
+        <label class="dropzone" id="dropzone" for="fileInput">
+          <input id="fileInput" type="file" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 15v4a1 1 0 001 1h14a1 1 0 001-1v-4"/></svg>
+          <strong>Enviar nova planilha</strong>
+          <span class="muted">Arraste aqui ou toque para escolher · .xlsx, .xls ou .csv</span>
+        </label>
+
+        <div class="preview" id="preview" hidden></div>
+
+        <div class="manual-box" id="manualBox"></div>
+
+        <p class="fineprint">Colunas reconhecidas: <b>Nome</b>, <b>Número</b> (telefone/WhatsApp), <b>E-mail</b>, <b>Comprou</b> (sim/não) e <b>Premium</b> (sim/não). A cada nova planilha o app cruza os dados por e-mail, telefone e nome: ninguém é duplicado, quem foi adicionado manualmente continua na lista e as entradas já confirmadas são mantidas. Os dados ficam salvos apenas neste aparelho.</p>
+
+        <div class="danger">
+          <button class="btn btn--text" type="button" id="resetCheckins">Zerar confirmações</button>
+          <button class="btn btn--text" type="button" id="resetAll">Apagar tudo deste aparelho</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ SHEET DO CONVIDADO ============ -->
+  <div class="sheet" id="sheet" hidden>
+    <div class="sheet__backdrop" data-close-sheet></div>
+    <div class="sheet__card" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+      <button class="sheet__close" type="button" aria-label="Fechar" data-close-sheet>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <div id="sheetBody"></div>
+    </div>
+  </div>
+
+  <!-- ============ CONFIRM MODAL ============ -->
+  <div class="modal" id="modal" hidden>
+    <div class="sheet__backdrop" data-close-modal></div>
+    <div class="modal__card" role="alertdialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalText">
+      <h3 class="display-sm" id="modalTitle"></h3>
+      <p class="muted" id="modalText"></p>
+      <div class="modal__actions">
+        <button class="btn btn--ghost" type="button" data-close-modal>Cancelar</button>
+        <button class="btn btn--danger" type="button" id="modalOk">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="xlsx.full.min.js" defer></script>
+  <script src="app.js" defer></script>
+</body>
+</html>
